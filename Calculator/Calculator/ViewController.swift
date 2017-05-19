@@ -10,42 +10,50 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    @IBOutlet weak var Display: UILabel!
+    @IBOutlet weak var display: UILabel!
     
     var userIsInMiddleOfTyping: Bool = false
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-    }
+    //    override func viewDidLoad() {
+    //        super.viewDidLoad()
+    //        // Do any additional setup after loading the view, typically from a nib.
+    //    }
+    //
+    //    override func didReceiveMemoryWarning() {
+    //        super.didReceiveMemoryWarning()
+    //        // Dispose of any resources that can be recreated.
+    //    }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
-    @IBAction func TouchButton(_ sender: UIButton) {
+    @IBAction func touchButton(_ sender: UIButton) {
         let number = sender.currentTitle!
-        let currentValue = Display.text!
+        let currentValue = display.text!
         
         if userIsInMiddleOfTyping {
-            Display.text = currentValue + number
+            display.text = currentValue + number
         } else {
-            Display.text = number
+            display.text = number
             userIsInMiddleOfTyping = true
         }
         
     }
-
-    @IBAction func PerformanceOperation(_ sender: UIButton) {
+    
+    private var displayValue: Double {
+        get {
+            return Double(display.text!)!
+        }
+        set {
+            display.text = String(newValue)
+        }
+    }
+    
+    private var brain = CalculatorBrain()
+    
+    @IBAction func performanceOperation(_ sender: UIButton) {
+        brain.setOperand(displayValue)
         userIsInMiddleOfTyping = false
-        if let mathematicalOperation = sender.currentTitle {
-            switch mathematicalOperation {
-            case "π":
-                Display.text = String(Double.pi)
-            default:
-                break
-            }
+        if let symbol = sender.currentTitle {
+            brain.performOperation(symbol)
+            displayValue = brain.result!
         }
     }
 }
