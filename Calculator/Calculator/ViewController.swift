@@ -14,27 +14,35 @@ class ViewController: UIViewController {
     
     var userIsInMiddleOfTyping: Bool = false
     
-    //    override func viewDidLoad() {
-    //        super.viewDidLoad()
-    //        // Do any additional setup after loading the view, typically from a nib.
-    //    }
-    //
-    //    override func didReceiveMemoryWarning() {
-    //        super.didReceiveMemoryWarning()
-    //        // Dispose of any resources that can be recreated.
-    //    }
+    private var brain = CalculatorBrain()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
     
     @IBAction func touchButton(_ sender: UIButton) {
-        let number = sender.currentTitle!
-        let currentValue = display.text!
+        let digit = sender.currentTitle!
+        //let currentValue = display.text!
         
         if userIsInMiddleOfTyping {
-            display.text = currentValue + number
+            if digit != "." || display.text!.range(of: ".") == nil {
+                display.text = display.text! + digit
+            }
         } else {
-            display.text = number
-            userIsInMiddleOfTyping = true
+            if digit == "." {
+                display.text = "0\(digit)"
+            }
+            else {
+                display.text = digit
+            }
         }
-        
+        userIsInMiddleOfTyping = true
     }
     
     private var displayValue: Double {
@@ -45,8 +53,6 @@ class ViewController: UIViewController {
             display.text = String(newValue)
         }
     }
-    
-    private var brain = CalculatorBrain()
     
     @IBAction func performanceOperation(_ sender: UIButton) {
         brain.setOperand(displayValue)

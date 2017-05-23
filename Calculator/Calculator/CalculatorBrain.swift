@@ -16,17 +16,29 @@ struct CalculatorBrain {
         case constant(Double)
         case unary((Double) -> Double)
         case binary((Double, Double) -> Double)
+        case factorial
         case equals
+        case clear
     }
     
     private var operations: Dictionary<String, Operation> = [
+        "=": Operation.equals,
+        "+": Operation.binary({ $0 + $1 }),
+        "−": Operation.binary({ $0 - $1 }),
+        "×": Operation.binary({ $0 * $1 }),
+        "÷": Operation.binary({ $0 / $1 }),
+        "±": Operation.unary({ -$0 }),
+        "%": Operation.unary({ $0 / 100 }),
+        "√": Operation.unary(sqrt),
         "π": Operation.constant(Double.pi),
         "e": Operation.constant(M_E),
-        "√": Operation.unary(sqrt),
-        "±": Operation.unary({ -$0 }),
-        "×": Operation.binary({ $0 * $1 }),
-        "+": Operation.binary({ $0 + $1 }),
-        "=": Operation.equals
+        "x²": Operation.unary({ pow($0, 2) }),
+        "ln": Operation.unary({ log(Double($0)) }),
+        "x!": Operation.factorial,
+        "sin": Operation.unary(sin),
+        "cos": Operation.unary(cos),
+        "tan": Operation.unary(tan),
+        "C": Operation.clear
     ]
     
     private var pbo: PendingBinaryOperation?
@@ -53,11 +65,25 @@ struct CalculatorBrain {
                 if accumulator != nil {
                     pbo = PendingBinaryOperation(function: function, firstOperand: accumulator!)
                 }
-            case.equals:
+            case .factorial:
+                let aux = factorial(number: accumulator!)
+                accumulator = aux
+            case .equals:
                 performPendingBinaryOperation()
+            case .clear:
+                clear()
             default:
                 break
             }
+        }
+    }
+    
+    private mutating func factorial(number: Double) -> Double {
+        if number == 0 {
+            return 1
+        }
+        else {
+            return number * factorial(number: number - 1)
         }
     }
     
@@ -65,6 +91,11 @@ struct CalculatorBrain {
         if accumulator != nil {
             accumulator = pbo?.perform(with: accumulator!)
         }
+    }
+    
+    private mutating func clear() {
+        accumulator = 0
+        pbo = nil
     }
     
     mutating func setOperand(_ operand: Double) {

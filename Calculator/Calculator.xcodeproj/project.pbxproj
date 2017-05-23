@@ -56,15 +56,39 @@
 		564EA50C1EC52E9500549976 /* Calculator */ = {
 			isa = PBXGroup;
 			children = (
+				56837F081ED3618F001A1DC3 /* Controller */,
+				56837F071ED36189001A1DC3 /* View */,
+				56837F061ED36181001A1DC3 /* Model */,
 				564EA50D1EC52E9500549976 /* AppDelegate.swift */,
 				564EA50F1EC52E9500549976 /* ViewController.swift */,
-				564EA5111EC52E9500549976 /* Main.storyboard */,
 				564EA5141EC52E9500549976 /* Assets.xcassets */,
-				564EA5161EC52E9500549976 /* LaunchScreen.storyboard */,
 				564EA5191EC52E9500549976 /* Info.plist */,
 				560AABB51ECE608700EB8D34 /* CalculatorBrain.swift */,
 			);
 			path = Calculator;
+			sourceTree = "<group>";
+		};
+		56837F061ED36181001A1DC3 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
+		56837F071ED36189001A1DC3 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				564EA5111EC52E9500549976 /* Main.storyboard */,
+				564EA5161EC52E9500549976 /* LaunchScreen.storyboard */,
+			);
+			name = View;
+			sourceTree = "<group>";
+		};
+		56837F081ED3618F001A1DC3 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Controller;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
