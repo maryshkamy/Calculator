@@ -11,9 +11,9 @@ import UIKit
 class ViewController: UIViewController {
     
     @IBOutlet weak var display: UILabel!
+    @IBOutlet weak var descriptionDisplay: UILabel!
     
-    var userIsInMiddleOfTyping: Bool = false
-    
+    private var userIsInMiddleOfTyping: Bool = false
     private var brain = CalculatorBrain()
     
     override func viewDidLoad() {
@@ -26,9 +26,17 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    private var displayValue: Double {
+        get {
+            return Double(display.text!)!
+        }
+        set {
+            display.text = String(newValue)
+        }
+    }
+    
     @IBAction func touchButton(_ sender: UIButton) {
         let digit = sender.currentTitle!
-        //let currentValue = display.text!
         
         if userIsInMiddleOfTyping {
             if digit != "." || display.text!.range(of: ".") == nil {
@@ -45,22 +53,18 @@ class ViewController: UIViewController {
         userIsInMiddleOfTyping = true
     }
     
-    private var displayValue: Double {
-        get {
-            return Double(display.text!)!
-        }
-        set {
-            display.text = String(newValue)
-        }
-    }
-    
     @IBAction func performanceOperation(_ sender: UIButton) {
-        brain.setOperand(displayValue)
-        userIsInMiddleOfTyping = false
+        if userIsInMiddleOfTyping {
+            brain.setOperation(displayValue)
+            userIsInMiddleOfTyping = false
+        }
+        
         if let symbol = sender.currentTitle {
             brain.performOperation(symbol)
-            displayValue = brain.result!
         }
+        
+        displayValue = brain.result!
+        descriptionDisplay.text = brain.description!
     }
 }
 
