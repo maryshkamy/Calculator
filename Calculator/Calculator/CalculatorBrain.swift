@@ -170,8 +170,6 @@ struct CalculatorBrain {
             case .clear:
                 clear()
                 lastOperation = .clear
-            default:
-                break
             }
         }
     }
