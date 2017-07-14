@@ -16,20 +16,6 @@ class CalculatorViewController: UIViewController {
     private var userIsInMiddleOfTyping: Bool = false
     private var brain = CalculatorBrain()
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-    }
-    
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
-    override var prefersStatusBarHidden: Bool {
-        return true
-    }
-    
     private var displayValue: Double {
         get {
             return Double(display.text!)!
