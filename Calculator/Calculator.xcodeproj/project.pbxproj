@@ -62,18 +62,50 @@
 		564EA50C1EC52E9500549976 /* Calculator */ = {
 			isa = PBXGroup;
 			children = (
-				564EA50D1EC52E9500549976 /* AppDelegate.swift */,
-				564EA5111EC52E9500549976 /* Main.storyboard */,
-				564EA5161EC52E9500549976 /* LaunchScreen.storyboard */,
-				564EA50F1EC52E9500549976 /* CalculatorViewController.swift */,
-				564EA5141EC52E9500549976 /* Assets.xcassets */,
-				564EA5191EC52E9500549976 /* Info.plist */,
-				560AABB51ECE608700EB8D34 /* CalculatorBrain.swift */,
-				5FAB94FC1F16E94C00072AEB /* GraphView.swift */,
-				5FE212C21F181E8F0014ED63 /* AxesDrawer.swift */,
-				5FAB94FE1F16E96100072AEB /* GraphViewController.swift */,
+				5F9AC99C1F1DC0D000DF3ABD /* Supporting Files */,
+				5F9AC99B1F1DC09A00DF3ABD /* Controller */,
+				5F9AC99A1F1DC09400DF3ABD /* Model */,
+				5F9AC9991F1DC08D00DF3ABD /* View */,
 			);
 			path = Calculator;
+			sourceTree = "<group>";
+		};
+		5F9AC9991F1DC08D00DF3ABD /* View */ = {
+			isa = PBXGroup;
+			children = (
+				564EA5111EC52E9500549976 /* Main.storyboard */,
+				564EA5161EC52E9500549976 /* LaunchScreen.storyboard */,
+				5FAB94FC1F16E94C00072AEB /* GraphView.swift */,
+			);
+			name = View;
+			sourceTree = "<group>";
+		};
+		5F9AC99A1F1DC09400DF3ABD /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				560AABB51ECE608700EB8D34 /* CalculatorBrain.swift */,
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
+		5F9AC99B1F1DC09A00DF3ABD /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				564EA50F1EC52E9500549976 /* CalculatorViewController.swift */,
+				5FAB94FE1F16E96100072AEB /* GraphViewController.swift */,
+			);
+			name = Controller;
+			sourceTree = "<group>";
+		};
+		5F9AC99C1F1DC0D000DF3ABD /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				564EA50D1EC52E9500549976 /* AppDelegate.swift */,
+				564EA5141EC52E9500549976 /* Assets.xcassets */,
+				564EA5191EC52E9500549976 /* Info.plist */,
+				5FE212C21F181E8F0014ED63 /* AxesDrawer.swift */,
+			);
+			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

@@ -101,9 +101,9 @@ struct CalculatorBrain {
         lastOperation = .clear
     }
     
-    var result: Double? {
+    var result: Double {
         get {
-            return accumulator
+            return accumulator!
         }
     }
     
@@ -127,9 +127,8 @@ struct CalculatorBrain {
         if number == 0 {
             return 1
         }
-        else {
-            return number * factorial(number: number - 1)
-        }
+        
+        return number * factorial(number: number - 1)
     }
     
     mutating func performOperation(_ symbol: String) {

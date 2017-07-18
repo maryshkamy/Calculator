@@ -53,8 +53,37 @@ class CalculatorViewController: UIViewController {
             brain.performOperation(symbol)
         }
         
-        displayValue = brain.result!
+        displayValue = brain.result
         descriptionDisplay.text = brain.description!
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let identifier = segue.identifier {
+            switch identifier {
+            case "graphButton":
+                guard !brain.isPartialResult! else {
+                    return
+                }
+                
+                var destinationViewController = segue.destination
+                
+                if let newViewController = destinationViewController as? UINavigationController {
+                    destinationViewController = newViewController.visibleViewController ?? destinationViewController
+                }
+                
+                if let viewController = destinationViewController as? GraphViewController {
+                    viewController.navigationItem.title = brain.description
+                    
+                    viewController.function = {
+                        (x: CGFloat) -> Double in self.brain.setOperation(Double(x))
+                        print(self.brain.result)
+                        return self.brain.result
+                    }
+                }
+            default:
+                return
+            }
+        }
     }
 }
 

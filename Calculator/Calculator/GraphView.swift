@@ -8,25 +8,28 @@
 
 import UIKit
 
+protocol GraphViewDataSource {
+    func getBounds() -> CGRect
+    func getYCoordinate(_ x: CGFloat) -> CGFloat?
+}
+
 @IBDesignable
 class GraphView: UIView {
     
     @IBInspectable
     var scale: CGFloat = 1.0 { didSet { setNeedsDisplay() } }
-    var graphOrigin: CGPoint! { didSet { setNeedsDisplay() } }
+    var origin: CGPoint! { didSet { setNeedsDisplay() } }
+    var dataSource: GraphViewDataSource?
     
-    // Retorna o centro do gráfico.
     var graphCenter: CGPoint {
-        if graphOrigin != nil {
-            return convert(graphOrigin!, to: superview)
+        if origin != nil {
+            return convert(origin!, to: superview)
         }
         
         return convert(center, to: superview)
     }
     
-    // Altera a escala do gráfico.
-    func changeScale(_ pinchGesture: UIPinchGestureRecognizer)
-    {
+    func pinchGraph(_ pinchGesture: UIPinchGestureRecognizer) {
         switch pinchGesture.state {
         case .changed,.ended:
             scale *= pinchGesture.scale
@@ -36,33 +39,57 @@ class GraphView: UIView {
         }
     }
     
-    // Move o gráfico.
-    func panGraph(_ panGesture: UIPanGestureRecognizer) {
+    func moveGraph(_ panGesture: UIPanGestureRecognizer) {
         switch panGesture.state {
         case .changed: fallthrough
         case .ended:
             let translation = panGesture.translation(in: self)
-            
-            // Update anything that depends on the pan gesture using translation.x and translation.y
-            graphOrigin.x += translation.x
-            graphOrigin.y += translation.y
-            
-            // Cumulative since start of recognition, get 'incremental' translation
+
+            origin.x += translation.x
+            origin.y += translation.y
+
             panGesture.setTranslation(CGPoint.zero, in: self)
         default: break
         }
     }
     
-    // Duplo clique. Move a origem do gráfico para onde ocorreu o gesto.
     func doubleTap(_ doubleTapGesture: UITapGestureRecognizer) {
         if doubleTapGesture.state == .ended {
-            graphOrigin = doubleTapGesture.location(in: self)
+            origin = doubleTapGesture.location(in: self)
         }
     }
     
-    // Desenha a função no gráfico.
     private func pathForFunction() -> UIBezierPath {
         let path = UIBezierPath()
+        
+        var pathIsEmpty = true
+        var point = CGPoint()
+        
+        let width = Int(bounds.size.width * scale)
+        
+        guard let data = dataSource else {
+            return path
+        }
+        
+        for pixel in 0...width {
+            point.x = CGFloat(pixel) / scale
+            
+            if let y = data.getYCoordinate((point.x - origin.x) / scale) {
+                if !y.isNormal && !y.isZero {
+                    pathIsEmpty = true
+                    continue
+                }
+                
+                point.y = origin.y - y * scale
+                
+                if pathIsEmpty {
+                    path.move(to: point)
+                    pathIsEmpty = false
+                } else {
+                    path.addLine(to: point)
+                }
+            }
+        }
         
         return path
     }
@@ -71,9 +98,10 @@ class GraphView: UIView {
         let axes = AxesDrawer(color: UIColor.black, contentScaleFactor: contentScaleFactor)
         axes.drawAxes(in: bounds, origin: graphCenter, pointsPerUnit: 50.0 * scale)
         
-        graphOrigin = graphOrigin ?? CGPoint(x: bounds.midX, y: bounds.midY)
+        origin = origin ?? CGPoint(x: bounds.midX, y: bounds.midY)
         
-        UIColor(red: 45/255.0, green: 105/255.0, blue: 92/255.0, alpha: 1).setStroke()
+        //UIColor(red: 45/255.0, green: 105/255.0, blue: 92/255.0, alpha: 1).setStroke()
+        UIColor.red.setStroke()
         pathForFunction().stroke()
     }
     
