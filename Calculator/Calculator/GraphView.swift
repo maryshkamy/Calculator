@@ -21,6 +21,9 @@ class GraphView: UIView {
     var origin: CGPoint! { didSet { setNeedsDisplay() } }
     var dataSource: GraphViewDataSource?
     
+    let color: UIColor = UIColor(red: 45/255.0, green: 105/255.0, blue: 92/255.0, alpha: 1)
+    let axes = AxesDrawer(color: UIColor.black)
+    
     var graphCenter: CGPoint {
         if origin != nil {
             return convert(origin!, to: superview)
@@ -62,14 +65,14 @@ class GraphView: UIView {
     private func pathForFunction() -> UIBezierPath {
         let path = UIBezierPath()
         
+        guard let data = dataSource else {
+            return path
+        }
+        
         var pathIsEmpty = true
         var point = CGPoint()
         
         let width = Int(bounds.size.width * scale)
-        
-        guard let data = dataSource else {
-            return path
-        }
         
         for pixel in 0...width {
             point.x = CGFloat(pixel) / scale
@@ -91,17 +94,16 @@ class GraphView: UIView {
             }
         }
         
+        path.lineWidth = 3.0
         return path
     }
     
     override func draw(_ rect: CGRect) {
-        let axes = AxesDrawer(color: UIColor.black, contentScaleFactor: contentScaleFactor)
         axes.drawAxes(in: bounds, origin: graphCenter, pointsPerUnit: 50.0 * scale)
         
         origin = origin ?? CGPoint(x: bounds.midX, y: bounds.midY)
         
-        //UIColor(red: 45/255.0, green: 105/255.0, blue: 92/255.0, alpha: 1).setStroke()
-        UIColor.red.setStroke()
+        color.set()
         pathForFunction().stroke()
     }
     

@@ -28,7 +28,7 @@
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="1" translatesAutoresizingMaskIntoConstraints="NO" id="2Rp-tr-5UO">
                                         <rect key="frame" x="0.0" y="0.0" width="288" height="952"/>
                                         <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="Lb5-yc-jdT">
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="Lb5-yc-jdT">
                                                 <rect key="frame" x="0.0" y="0.0" width="288" height="94.5"/>
                                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="35"/>
@@ -413,6 +413,7 @@
                     <connections>
                         <outlet property="descriptionDisplay" destination="Lb5-yc-jdT" id="2pp-bm-hkP"/>
                         <outlet property="display" destination="R72-UL-mdp" id="XkF-UI-YxN"/>
+                        <outlet property="graphButton" destination="lWc-pG-6uH" id="Xj3-N0-9P3"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

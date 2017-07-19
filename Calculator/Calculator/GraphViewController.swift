@@ -26,6 +26,8 @@ class GraphViewController: UIViewController, GraphViewDataSource {
     
     @IBOutlet weak var graphView: GraphView! {
         didSet {
+            graphView.dataSource = self
+            
             let pinch = UIPinchGestureRecognizer(target: graphView, action: #selector(GraphView.pinchGraph(_:)))
             graphView.addGestureRecognizer(pinch)
             
