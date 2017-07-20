@@ -16,13 +16,14 @@ protocol GraphViewDataSource {
 @IBDesignable
 class GraphView: UIView {
     
-    @IBInspectable
-    var scale: CGFloat = 1.0 { didSet { setNeedsDisplay() } }
-    var origin: CGPoint! { didSet { setNeedsDisplay() } }
-    var dataSource: GraphViewDataSource?
+    private let axes = AxesDrawer(color: UIColor.black)
     
     let color: UIColor = UIColor(red: 45/255.0, green: 105/255.0, blue: 92/255.0, alpha: 1)
-    let axes = AxesDrawer(color: UIColor.black)
+    
+    @IBInspectable
+    var scale: CGFloat = 40.0 { didSet { setNeedsDisplay() } }
+    var origin: CGPoint! { didSet { setNeedsDisplay() } }
+    var dataSource: GraphViewDataSource?
     
     var graphCenter: CGPoint {
         if origin != nil {
@@ -37,6 +38,7 @@ class GraphView: UIView {
         case .changed,.ended:
             scale *= pinchGesture.scale
             pinchGesture.scale = 1
+            
         default:
             break
         }
@@ -44,7 +46,9 @@ class GraphView: UIView {
     
     func moveGraph(_ panGesture: UIPanGestureRecognizer) {
         switch panGesture.state {
-        case .changed: fallthrough
+        case .changed:
+            fallthrough
+            
         case .ended:
             let translation = panGesture.translation(in: self)
 
@@ -52,7 +56,9 @@ class GraphView: UIView {
             origin.y += translation.y
 
             panGesture.setTranslation(CGPoint.zero, in: self)
-        default: break
+            
+        default:
+            break
         }
     }
     
@@ -64,6 +70,7 @@ class GraphView: UIView {
     
     private func pathForFunction() -> UIBezierPath {
         let path = UIBezierPath()
+        let width = Int(bounds.size.width * scale)
         
         guard let data = dataSource else {
             return path
@@ -71,8 +78,6 @@ class GraphView: UIView {
         
         var pathIsEmpty = true
         var point = CGPoint()
-        
-        let width = Int(bounds.size.width * scale)
         
         for pixel in 0...width {
             point.x = CGFloat(pixel) / scale
@@ -99,12 +104,12 @@ class GraphView: UIView {
     }
     
     override func draw(_ rect: CGRect) {
-        axes.drawAxes(in: bounds, origin: graphCenter, pointsPerUnit: 50.0 * scale)
-        
         origin = origin ?? CGPoint(x: bounds.midX, y: bounds.midY)
         
         color.set()
         pathForFunction().stroke()
+        
+        axes.drawAxes(in: dataSource?.getBounds() ?? bounds, origin: origin, pointsPerUnit: scale)
     }
     
 }

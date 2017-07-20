@@ -12,59 +12,48 @@ struct CalculatorBrain {
     
     typealias PropertyList = AnyObject
     
-    private var currentPrecedence = Precedence.max
-    
-    private var descriptionAccumulator = "0" {
-        didSet {
-            if pbo == nil {
-                currentPrecedence = Precedence.max
-            }
-        }
-    }
-    
-    private var accumulator: Double = 0
+    private var accumulator: Double?
     private var pbo: PendingBinaryOperation?
-    private var history = [AnyObject]()
+    private var history: [String] = []
+    private var lastOperation: LastOperation = .clear
     
     private var operations: Dictionary<String, Operation> = [
         "=": Operation.equals,
-        "+": Operation.binary({ $0 + $1 }, { "\($0) + \($1)" }, Precedence.min),
-        "−": Operation.binary({ $0 - $1 }, { "\($0) − \($1)" }, Precedence.min),
-        "×": Operation.binary({ $0 * $1 }, { "\($0) × \($1)" }, Precedence.max),
-        "÷": Operation.binary({ $0 / $1 }, { "\($0) ÷ \($1)" }, Precedence.max),
-        "±": Operation.unary({ -$0 }, { "-\($0)" }),
-        "%": Operation.unary({ $0 / 100 }, { "\($0)%" }),
-        "√": Operation.unary(sqrt, { "√\($0)" }),
+        "+": Operation.binary({ $0 + $1 }),
+        "−": Operation.binary({ $0 - $1 }),
+        "×": Operation.binary({ $0 * $1 }),
+        "÷": Operation.binary({ $0 / $1 }),
+        "±": Operation.unary({ -$0 }),
+        "%": Operation.unary({ $0 / 100 }),
+        "√": Operation.unary(sqrt),
         "π": Operation.constant(Double.pi),
         "e": Operation.constant(M_E),
-        "x²": Operation.unary({ pow($0, 2) }, { "(\($0))²" }),
-        "ln": Operation.unary({ log(Double($0)) }, { "ln (\($0))" }),
-//        "x!": Operation.factorial({ $0 }, { "\($0)!" }),
-        "sin": Operation.unary(sin, { "sin (\($0))" }),
-        "cos": Operation.unary(cos, { "cos (\($0))" }),
-        "tan": Operation.unary(tan, { "tan (\($0))" }),
+        "x²": Operation.unary({ pow($0, 2) }),
+        "ln": Operation.unary({ log(Double($0)) }),
+        "x!": Operation.factorial,
+        "sin": Operation.unary(sin),
+        "cos": Operation.unary(cos),
+        "tan": Operation.unary(tan),
         "C": Operation.clear
     ]
     
-    var variableValues = [String:Double]()
-    
-    var isPartialResult: Bool {
+    var isPartialResult: Bool? {
         get {
             return pbo != nil
         }
     }
     
-    var description: String {
+    var description: String? {
         get {
-            if pbo == nil {
-                return descriptionAccumulator
-            } else {
-                return pbo!.descriptionFunction(pbo!.descriptionOperand, pbo!.descriptionOperand != descriptionAccumulator ? descriptionAccumulator : "")
+            if pbo != nil {
+                return history.joined(separator: " ") + " "
             }
+            
+            return history.joined(separator: " ")
         }
     }
     
-    var result: Double {
+    var result: Double? {
         get {
             return accumulator
         }
@@ -82,12 +71,8 @@ struct CalculatorBrain {
                 for i in array {
                     if let operation = i as? Double {
                         setOperation(operation)
-                    } else if let variableName = i as? String {
-                        if variableValues[variableName] != nil {
-                            setOperation(variableName)
-                        } else if let operation = i as? String {
-                            performOperation(operation)
-                        }
+                    } else if let operation = i as? String {
+                        performOperation(operation)
                     }
                 }
             }
@@ -96,110 +81,122 @@ struct CalculatorBrain {
     
     private enum Operation {
         case constant(Double)
-        case unary((Double) -> Double, (String) -> String)
-        case binary((Double, Double) -> Double, (String, String) -> String, Precedence)
-        case null(() -> Double, String)
-//        case factorial((Double) -> Double, (String) -> String)
+        case unary((Double) -> Double)
+        case binary((Double, Double) -> Double)
+        case factorial
         case equals
         case clear
     }
     
-    private enum Precedence: Int {
-        case min = 0, max
+    private enum LastOperation {
+        case digit
+        case constant
+        case unary
+        case binary
+        case factorial
+        case equals
+        case clear
     }
     
     private struct PendingBinaryOperation {
-        var function: (Double, Double) -> Double
-        var firstOperand: Double
-        var descriptionFunction: (String, String) -> String
-        var descriptionOperand: String
+        let function: (Double, Double) -> Double
+        let firstOperand: Double
+        
+        func perform(with secondOperand: Double) -> Double {
+            return function(firstOperand, secondOperand)
+        }
     }
 
     private mutating func performPendingBinaryOperation() {
         if pbo != nil {
-            accumulator = pbo!.function(pbo!.firstOperand, accumulator)
-            descriptionAccumulator = pbo!.descriptionFunction(pbo!.descriptionOperand, descriptionAccumulator)
-            pbo = nil
+            if accumulator != nil {
+                accumulator = pbo?.perform(with: accumulator!)
+                pbo = nil
+            }
         }
     }
     
     private mutating func factorial(number: Double) -> Double {
         if number == 0 {
             return 1
+        } else {
+            return number * factorial(number: number - 1)
         }
-        
-        return number * factorial(number: number - 1)
     }
     
     private mutating func clear() {
-        if !history.isEmpty {
-            history.removeLast()
-            program = history as CalculatorBrain.PropertyList
+        accumulator = 0
+        pbo = nil
+        history.removeAll()
+        lastOperation = .clear
+    }
+    
+    private mutating func wrapWithParens(_ symbol: String) {
+        if lastOperation == .equals {
+            history.insert(")", at: history.count - 1)
+            history.insert(symbol, at: 0)
+            history.insert("(", at: 1)
         } else {
-            pbo = nil
-            accumulator = 0
-            descriptionAccumulator = "0"
-            history.removeAll()
-            descriptionAccumulator = ""
+            history.insert(symbol, at: history.count - 1)
+            history.insert("(", at: history.count - 1)
+            history.insert(")", at: history.count)
         }
     }
     
     mutating func setOperation(_ operation: Double) {
+        if lastOperation == .unary {
+            history.removeAll()
+        }
+        
         accumulator = operation
-        descriptionAccumulator = String(format: "%g", operation)
-        history.append(String(operation) as AnyObject)
-    }
-    
-    mutating func setOperation(_ variableName: String) {
-        variableValues[variableName] = variableValues[variableName] ?? 0.0
-        accumulator = variableValues[variableName]!
-        descriptionAccumulator = variableName
-        history.append(variableName as AnyObject)
+        history.append(String(operation))
+        lastOperation = .digit
     }
     
     mutating func performOperation(_ symbol: String) {
-        history.append(symbol as AnyObject)
-        
         if let operation = operations[symbol] {
             switch operation {
             case .constant(let constant):
+                history.append(symbol)
                 accumulator = constant
-                descriptionAccumulator = symbol
+                lastOperation = .constant
                 
-            case .unary(let function, let descriptionFunction):
-                accumulator = function(accumulator)
-                descriptionAccumulator = descriptionFunction(descriptionAccumulator)
-                
-            case .binary(let function, let descriptionFunction, let precedence):
-                performPendingBinaryOperation()
-                
-                if currentPrecedence.rawValue < precedence.rawValue {
-                    descriptionAccumulator = "(\(descriptionAccumulator))"
+            case .unary(let function):
+                if accumulator != nil {
+                    wrapWithParens(symbol)
+                    accumulator = function(accumulator!)
+                    lastOperation = .unary
                 }
                 
-                currentPrecedence = precedence
-                pbo = PendingBinaryOperation(function: function, firstOperand: accumulator, descriptionFunction: descriptionFunction, descriptionOperand: descriptionAccumulator)
+            case .binary(let function):
+                if accumulator != nil {
+                    if lastOperation == .equals {
+                        history.removeLast()
+                    }
+                    
+                    history.append(symbol)
+                    performPendingBinaryOperation()
+                    pbo = PendingBinaryOperation(function: function, firstOperand: accumulator!)
+                    lastOperation = .binary
+                }
                 
-            case .null(let function, let descriptionConstant):
-                accumulator = function()
-                descriptionAccumulator = descriptionConstant
-                
-//            case .factorial(let constant, let descriptionConstant): break
-//                accumulator = factorial(number: constant)
-//                descriptionAccumulator = descriptionConstant
+            case .factorial:
+                history.append("!")
+                let aux = factorial(number: accumulator!)
+                accumulator = aux
+                lastOperation = .factorial
                 
             case .equals:
+                if lastOperation == .binary {
+                    history.append(String(describing: accumulator))
+                }
                 performPendingBinaryOperation()
+                lastOperation = .equals
                 
             case .clear:
                 clear()
+                lastOperation = .clear
             }
         }
-    }
-    
-    func getDescription() -> String {
-        let space = ((description.hasSuffix(" ")) ? "" : " ")
-        
-        return (description + space + " ")
     }
 }

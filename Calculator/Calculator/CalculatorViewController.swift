@@ -10,9 +10,9 @@ import UIKit
 
 class CalculatorViewController: UIViewController {
     
+    @IBOutlet weak var graph: UIButton!
     @IBOutlet weak var display: UILabel!
     @IBOutlet weak var descriptionDisplay: UILabel!
-    @IBOutlet weak var graphButton: UIButton!
     
     private var userIsInMiddleOfTyping: Bool = false
     private var brain = CalculatorBrain()
@@ -24,12 +24,6 @@ class CalculatorViewController: UIViewController {
         set {
             display.text = String(newValue)
         }
-    }
-    
-    private func updateUI() {
-        displayValue = brain.result
-        descriptionDisplay.text = (brain.description.isEmpty ? " " : brain.getDescription())
-        graphButton.isEnabled = !brain.isPartialResult
     }
     
     @IBAction func touchButton(_ sender: UIButton) {
@@ -60,14 +54,26 @@ class CalculatorViewController: UIViewController {
             brain.performOperation(symbol)
         }
         
-        updateUI()
+        displayValue = brain.result!
+        descriptionDisplay.text = brain.description!
+        graph.isEnabled = !brain.isPartialResult!
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let identifier = segue.identifier {
             switch identifier {
-            case "graphButton":
-                guard !brain.isPartialResult else {
+            case "Graph":
+                guard !brain.isPartialResult! else {
                     return
                 }
                 
@@ -81,11 +87,9 @@ class CalculatorViewController: UIViewController {
                     viewController.navigationItem.title = brain.description
                     
                     viewController.function = {
-                        (x: CGFloat) -> Double in
-//                        self.brain.variableValues[Constansts.Math.variable] = Double(x)
-                        self.brain.program = self.brain.program
+                        (x: CGFloat) -> Double in self.brain.program = self.brain.program
                         
-                        return self.brain.result
+                        return self.brain.result!
                     }
                 }
                 
