@@ -10,8 +10,6 @@ import Foundation
 
 struct CalculatorBrain {
     
-//    typealias PropertyList = AnyObject
-    
     private var accumulator: Double?
     private var pbo: PendingBinaryOperation?
     private var history: [String] = []
@@ -58,26 +56,6 @@ struct CalculatorBrain {
             return accumulator
         }
     }
-    
-//    var program: PropertyList {
-//        get {
-//            return history as CalculatorBrain.PropertyList
-//        }
-//        
-//        set {
-//            clear()
-//            
-//            if let array = newValue as? [AnyObject] {
-//                for i in array {
-//                    if let operation = i as? Double {
-//                        setOperation(operation)
-//                    } else if let operation = i as? String {
-//                        performOperation(operation)
-//                    }
-//                }
-//            }
-//        }
-//    }
     
     private enum Operation {
         case constant(Double)
@@ -179,7 +157,6 @@ struct CalculatorBrain {
                 
             case .binary(let function):
                 if accumulator != nil {
-                    
                     history.append(symbol)
                     performPendingBinaryOperation()
                     pbo = PendingBinaryOperation(function: function, firstOperand: accumulator!)

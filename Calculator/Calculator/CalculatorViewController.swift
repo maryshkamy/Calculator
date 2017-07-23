@@ -14,7 +14,11 @@ class CalculatorViewController: UIViewController {
     @IBOutlet weak var display: UILabel!
     @IBOutlet weak var descriptionDisplay: UILabel!
     
-    private var userIsInMiddleOfTyping: Bool = false
+    private var userIsInMiddleOfTyping: Bool = false {
+        willSet {
+            graph.isEnabled = !newValue
+        }
+    }
     private var brain = CalculatorBrain()
     
     private var displayValue: Double {
@@ -58,6 +62,7 @@ class CalculatorViewController: UIViewController {
         descriptionDisplay.text = brain.description!
         
         graph.isEnabled = brain.result == 0 ? false : true
+        
     }
     
     override func viewDidLoad() {
