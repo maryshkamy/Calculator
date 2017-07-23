@@ -10,7 +10,7 @@ import Foundation
 
 struct CalculatorBrain {
     
-    typealias PropertyList = AnyObject
+//    typealias PropertyList = AnyObject
     
     private var accumulator: Double?
     private var pbo: PendingBinaryOperation?
@@ -24,11 +24,11 @@ struct CalculatorBrain {
         "×": Operation.binary({ $0 * $1 }),
         "÷": Operation.binary({ $0 / $1 }),
         "±": Operation.unary({ -$0 }),
-        "%": Operation.unary({ $0 / 100 }),
+        "%": Operation.percentage({ $0 / 100 }),
         "√": Operation.unary(sqrt),
         "π": Operation.constant(Double.pi),
         "e": Operation.constant(M_E),
-        "x²": Operation.unary({ pow($0, 2) }),
+        "x²": Operation.pow({ pow($0, 2) }),
         "ln": Operation.unary({ log(Double($0)) }),
         "x!": Operation.factorial,
         "sin": Operation.unary(sin),
@@ -59,30 +59,32 @@ struct CalculatorBrain {
         }
     }
     
-    var program: PropertyList {
-        get {
-            return history as CalculatorBrain.PropertyList
-        }
-        
-        set {
-            clear()
-            
-            if let array = newValue as? [AnyObject] {
-                for i in array {
-                    if let operation = i as? Double {
-                        setOperation(operation)
-                    } else if let operation = i as? String {
-                        performOperation(operation)
-                    }
-                }
-            }
-        }
-    }
+//    var program: PropertyList {
+//        get {
+//            return history as CalculatorBrain.PropertyList
+//        }
+//        
+//        set {
+//            clear()
+//            
+//            if let array = newValue as? [AnyObject] {
+//                for i in array {
+//                    if let operation = i as? Double {
+//                        setOperation(operation)
+//                    } else if let operation = i as? String {
+//                        performOperation(operation)
+//                    }
+//                }
+//            }
+//        }
+//    }
     
     private enum Operation {
         case constant(Double)
         case unary((Double) -> Double)
         case binary((Double, Double) -> Double)
+        case percentage((Double) -> Double)
+        case pow((Double) -> Double)
         case factorial
         case equals
         case clear
@@ -93,6 +95,8 @@ struct CalculatorBrain {
         case constant
         case unary
         case binary
+        case percentage
+        case pow
         case factorial
         case equals
         case clear
@@ -132,11 +136,16 @@ struct CalculatorBrain {
     }
     
     private mutating func wrapWithParens(_ symbol: String) {
-        if lastOperation == .equals {
-            history.insert(")", at: history.count - 1)
+        switch lastOperation {
+        case .clear:
+            return
+            
+        case .equals:
+            history.insert(")", at: history.count)
             history.insert(symbol, at: 0)
             history.insert("(", at: 1)
-        } else {
+            
+        default:
             history.insert(symbol, at: history.count - 1)
             history.insert("(", at: history.count - 1)
             history.insert(")", at: history.count)
@@ -170,9 +179,6 @@ struct CalculatorBrain {
                 
             case .binary(let function):
                 if accumulator != nil {
-                    if lastOperation == .equals {
-                        history.removeLast()
-                    }
                     
                     history.append(symbol)
                     performPendingBinaryOperation()
@@ -180,12 +186,26 @@ struct CalculatorBrain {
                     lastOperation = .binary
                 }
                 
+            case .percentage(let function):
+                if accumulator != nil {
+                    history.append("%")
+                    accumulator = function(accumulator!)
+                    lastOperation = .percentage
+                }
+
+            case .pow(let function):
+                if accumulator != nil {
+                    history.append("²")
+                    accumulator = function(accumulator!)
+                    lastOperation = .pow
+                }
+
             case .factorial:
                 history.append("!")
                 let aux = factorial(number: accumulator!)
                 accumulator = aux
                 lastOperation = .factorial
-                
+
             case .equals:
                 if lastOperation == .binary {
                     history.append(String(describing: accumulator))
